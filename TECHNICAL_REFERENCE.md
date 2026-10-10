@@ -574,7 +574,7 @@ Run with `npm test` (Vitest + jsdom). **5 files, 29 tests.**
 | `transaction.model.spec.ts` | `isValidDateString` (real, malformed, impossible dates incl. leap years); `isValidTransaction` (good record, bad date, non-positive amount, bad type/description/category, non-objects). |
 | `transaction.service.spec.ts` | Creation, start-empty, add + persist + unique id, totals/balance, update preserves id, update/delete missing → `false`, delete removes from storage, find by type. Plus hydration: synchronous load on construction, corrupt JSON → empty, invalid records dropped. |
 | `transaction-list.component.spec.ts` | Default render, **combined** search + type + category filter, category reset when type changes, and that the dashboard **total** is independent of active filters. |
-| `transaction-form.component.spec.ts` | Edit route loads a pre-seeded record (simulated refresh), category options swap with type, and edit mode keeps then clears the stored category on type change. |
+| `transaction-form.component.spec.ts` | Edit route loads a pre-seeded record (simulated refresh), category options swap with type, edit mode keeps then clears the stored category on type change, and **save-fails** path shows the inline error instead of an alert. |
 
 The last three service tests and the form/list component tests were added
 specifically to pin the behaviours that previously regressed.
