@@ -118,11 +118,14 @@ describe('TransactionFormComponent', () => {
     const fixture = createComponent();
     const host = fixture.nativeElement as HTMLElement;
     const service = TestBed.inject(TransactionService);
-    vi.spyOn(service, 'addTransaction').mockReturnValue(null);
+    const addSpy = vi.spyOn(service, 'addTransaction').mockReturnValue(null);
 
     fillInput(host, '#description', 'Coffee');
     fillInput(host, '#amount', '5');
-    fillInput(host, '#date', '2026-04-01');
+    const dateInput = host.querySelector<HTMLInputElement>('#date')!;
+    const dateChange = new Event('change.bs.datepicker', { bubbles: true });
+    Object.assign(dateChange, { dates: ['2026-04-01'] });
+    dateInput.dispatchEvent(dateChange);
     const category = host.querySelector<HTMLSelectElement>('#category')!;
     category.value = 'Food';
     category.dispatchEvent(new Event('change'));
@@ -131,6 +134,7 @@ describe('TransactionFormComponent', () => {
     host.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     fixture.detectChanges();
 
+    expect(addSpy).toHaveBeenCalledWith(expect.objectContaining({ date: '2026-04-01' }));
     expect(host.querySelector('.save-error')?.textContent).toContain('Could not save');
   });
 });

@@ -18,6 +18,7 @@ A single-page Personal Expense Tracker built with Angular, TypeScript, Reactive 
 - TypeScript (strict)
 - Reactive Forms (`NonNullableFormBuilder`, typed form)
 - Angular Router
+- Bootstrap 6 datepicker (English calendar, wrapped as a form control)
 - Browser `localStorage`
 
 Built and tested with Node 24.21 and npm 11.19.

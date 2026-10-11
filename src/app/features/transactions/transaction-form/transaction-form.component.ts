@@ -6,6 +6,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { Category, Transaction, TransactionType, getCategoriesForType, getTodayLocalISODate } from '../../../models/transaction.model';
 import { noWhitespaceValidator, validDateValidator } from '../../../shared/validators/transaction.validators';
+import { DatePickerComponent } from '../../../shared/components/date-picker/date-picker.component';
 
 type TransactionForm = FormGroup<{
   description: FormControl<string>;
@@ -18,7 +19,7 @@ type TransactionForm = FormGroup<{
 @Component({
   selector: 'app-transaction-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, DatePickerComponent],
   template: `
     <div class="transaction-form-page">
       <header class="page-header">
@@ -142,15 +143,12 @@ type TransactionForm = FormGroup<{
 
             <div class="form-field">
               <label for="date" class="form-label">Date <span class="required" aria-hidden="true">*</span></label>
-              <input
-                type="date"
-                id="date"
-                class="form-input"
+              <app-date-picker
+                inputId="date"
                 formControlName="date"
-                [class.form-input--invalid]="isFieldInvalid('date')"
-                aria-describedby="date-error"
-                aria-invalid="{{ isFieldInvalid('date') }}"
-              />
+                [invalid]="isFieldInvalid('date')"
+                describedBy="date-error"
+              ></app-date-picker>
               @if (isFieldInvalid('date')) {
                 <div id="date-error" class="form-error" role="alert">
                   @if (form.get('date')?.errors?.['required']) {
