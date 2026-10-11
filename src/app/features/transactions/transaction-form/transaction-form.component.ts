@@ -48,9 +48,7 @@ export class TransactionFormComponent implements OnInit {
   });
 
   constructor() {
-    // `type` is a plain form control, so its value is not a signal. Subscribe
-    // to valueChanges to keep the category list in sync with the selection and
-    // to clear a category that is not valid for the newly selected type.
+  
     this.form.controls.type.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((type: TransactionType) => {
@@ -103,16 +101,10 @@ export class TransactionFormComponent implements OnInit {
 
   protected isFieldInvalid(fieldName: string): boolean {
     const control = this.form.get(fieldName);
-    // Only react to this control's own state. Checking `this.form.touched`
-    // here would turn every invalid field red as soon as a single field is
-    // touched, because touching a child marks the parent group touched too.
     return !!control && control.invalid && (control.touched || control.dirty);
   }
 
-  /**
-   * Moves focus to the first control that failed validation. Runs on the next
-   * tick so Angular has applied the invalid styling before we look for it.
-   */
+
   private focusFirstInvalidField(): void {
     setTimeout(() => {
       const invalidControl = this.host.nativeElement.querySelector<HTMLElement>(
@@ -132,7 +124,6 @@ export class TransactionFormComponent implements OnInit {
     const formValue = this.form.getRawValue();
     const { amount, category } = formValue;
     if (amount === null || category === '') {
-      // Both are guarded by the validators above; this narrows the types without casts.
       return;
     }
 

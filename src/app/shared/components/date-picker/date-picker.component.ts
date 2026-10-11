@@ -10,14 +10,6 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import Datepicker from 'bootstrap/js/dist/datepicker.js';
 
-/**
- * Thin adapter that lets Bootstrap's datepicker drive a reactive form control.
- *
- * Bootstrap updates the input's visible value and fires `change.bs.datepicker`
- * (carrying ISO dates), but it never dispatches a native `input`/`change`
- * event, so Angular's default value accessor cannot observe the selection.
- * This control bridges the two and keeps the model value as `YYYY-MM-DD`.
- */
 @Component({
   selector: 'app-date-picker',
   standalone: true,
@@ -49,9 +41,6 @@ export class DatePickerComponent implements ControlValueAccessor, AfterViewInit,
     if (!input) {
       return;
     }
-
-    // The Bootstrap data API creates and shows the picker on focus; the
-    // template binding above turns its change event into the form value.
     input.value = this.pendingValue;
     input.disabled = this.disabled;
   }

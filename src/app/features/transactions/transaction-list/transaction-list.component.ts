@@ -41,8 +41,6 @@ export class TransactionListComponent {
       return matchesSearch && matchesType && matchesCategory;
     });
 
-    // Newest first. `filter` already returns a fresh array, so sorting it is safe.
-    // The id comparison is only a tie-breaker, keeping equal dates deterministic.
     return filtered.sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
   });
 
@@ -59,7 +57,7 @@ export class TransactionListComponent {
   protected onTypeChange(value: 'all' | TransactionType): void {
     this.selectedType.set(value);
 
-    // Keep the category filter valid for the newly selected type.
+
     const category = this.selectedCategory();
     if (category !== 'all' && value !== 'all' && !getCategoriesForType(value).includes(category)) {
       this.selectedCategory.set('all');
