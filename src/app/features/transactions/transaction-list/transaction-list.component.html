@@ -1,0 +1,156 @@
+<div class="transaction-list-page">
+  <header class="page-header">
+    <div class="page-header__content">
+      <h1 class="page-header__title">Transactions</h1>
+      <a routerLink="/transactions/new" class="btn btn--primary">
+        <span aria-hidden="true">➕</span> Add Transaction
+      </a>
+    </div>
+  </header>
+
+  <main class="page-main">
+    @if (deleteError()) {
+      <div class="delete-error" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span>{{ deleteError() }}</span>
+        <button type="button" class="delete-error__dismiss" (click)="deleteError.set('')" aria-label="Dismiss error">✕</button>
+      </div>
+    }
+
+    <section class="filters-section" aria-labelledby="filters-heading">
+      <h2 id="filters-heading" class="visually-hidden">Search and Filter Transactions</h2>
+
+      <div class="search-box">
+        <label for="search" class="visually-hidden">Search by description</label>
+        <input
+          type="search"
+          id="search"
+          class="form-input"
+          placeholder="Search by description..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchChange($event)"
+          aria-describedby="search-help"
+        />
+        <span id="search-help" class="visually-hidden">Type to filter transactions by description</span>
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-group">
+          <label for="type-filter" class="visually-hidden">Filter by type</label>
+          <select
+            id="type-filter"
+            class="form-select"
+            [ngModel]="selectedType()"
+            (ngModelChange)="onTypeChange($event)"
+          >
+            <option value="all">All Types</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="category-filter" class="visually-hidden">Filter by category</label>
+          <select
+            id="category-filter"
+            class="form-select"
+            [ngModel]="selectedCategory()"
+            (ngModelChange)="onCategoryChange($event)"
+          >
+            <option value="all">All Categories</option>
+            @for (cat of availableCategories(); track cat) {
+              <option [value]="cat">{{ cat }}</option>
+            }
+          </select>
+        </div>
+
+        @if (hasActiveFilters()) {
+          <button type="button" class="btn btn--ghost btn--sm" (click)="clearFilters()">
+            Clear Filters
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="transactions-section" aria-labelledby="transactions-heading">
+      <h2 id="transactions-heading" class="visually-hidden">Transaction List</h2>
+
+      @if (filteredTransactions().length === 0) {
+        @if (transactionService.transactions().length === 0) {
+          <app-empty-state
+            icon="transactions"
+            title="No transactions yet"
+            message="Get started by adding your first income or expense transaction."
+            actionLabel="Add Transaction"
+            actionRoute="/transactions/new"
+          />
+        } @else {
+          <app-empty-state
+            icon="search"
+            title="No matching transactions"
+            message="Try adjusting your search or filters to find what you're looking for."
+            actionLabel="Clear Filters"
+            [actionClick]="clearFilters"
+          />
+        }
+      } @else {
+        <div class="table-container">
+          <table class="transactions-table" role="table">
+            <thead>
+              <tr>
+                <th scope="col">Description</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Type</th>
+                <th scope="col">Category</th>
+                <th scope="col">Date</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (transaction of filteredTransactions(); track transaction.id) {
+                <tr>
+                  <td class="transactions-table__description" data-label="Description">{{ transaction.description }}</td>
+                  <td class="transactions-table__amount" data-label="Amount">
+                    <span [class]="'amount--' + transaction.type">
+                      {{ formatAmount(transaction.amount, transaction.type) }}
+                    </span>
+                  </td>
+                  <td data-label="Type">
+                    <span class="badge" [class]="'badge--' + transaction.type">
+                      {{ transaction.type | titlecase }}
+                    </span>
+                  </td>
+                  <td data-label="Category">{{ transaction.category }}</td>
+                  <td data-label="Date">{{ formatDate(transaction.date) }}</td>
+                  <td class="transactions-table__actions" data-label="Actions">
+                    <div class="actions-cell">
+                      <a
+                        [routerLink]="['/transactions', transaction.id, 'edit']"
+                        class="btn btn--ghost btn--sm btn--icon"
+                        aria-label="Edit {{ transaction.description }}"
+                      >
+                        ✏️
+                      </a>
+                      <button
+                        type="button"
+                        class="btn btn--ghost btn--sm btn--icon btn--danger"
+                        (click)="confirmDelete(transaction)"
+                        aria-label="Delete {{ transaction.description }}"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <p class="results-count" aria-live="polite">
+          Showing {{ filteredTransactions().length }} of {{ transactionService.transactionCount() }} transaction(s)
+        </p>
+      }
+    </section>
+  </main>
+</div>

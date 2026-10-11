@@ -1,0 +1,20 @@
+<header class="app-bar">
+  <a routerLink="/dashboard" class="app-bar__brand">Personal Expense Tracker</a>
+  <nav class="app-bar__nav" aria-label="Main navigation">
+    <a
+      routerLink="/dashboard"
+      routerLinkActive="app-bar__link--active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="app-bar__link"
+    >
+      Dashboard
+    </a>
+    <a
+      routerLink="/transactions"
+      routerLinkActive="app-bar__link--active"
+      class="app-bar__link"
+    >
+      Transactions
+    </a>
+  </nav>
+</header>

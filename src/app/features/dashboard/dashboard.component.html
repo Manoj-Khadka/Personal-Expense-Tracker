@@ -1,0 +1,92 @@
+<div class="dashboard">
+  <main class="dashboard__main">
+    <section class="dashboard__summary" aria-labelledby="summary-heading">
+      <h1 id="summary-heading" class="dashboard__heading">Financial Overview</h1>
+      <div class="summary-grid">
+        <article class="summary-card summary-card--income">
+          <div class="summary-card__icon" aria-hidden="true">💰</div>
+          <div class="summary-card__content">
+            <span class="summary-card__label">Total Income</span>
+            <span class="summary-card__value summary-card__value--positive">{{ formattedTotalIncome() }}</span>
+          </div>
+        </article>
+
+        <article class="summary-card summary-card--expense">
+          <div class="summary-card__icon" aria-hidden="true">💸</div>
+          <div class="summary-card__content">
+            <span class="summary-card__label">Total Expenses</span>
+            <span class="summary-card__value summary-card__value--negative">{{ formattedTotalExpenses() }}</span>
+          </div>
+        </article>
+
+        <article class="summary-card summary-card--balance" [class.summary-card--negative]="balance() < 0">
+          <div class="summary-card__icon" aria-hidden="true">⚖️</div>
+          <div class="summary-card__content">
+            <span class="summary-card__label">Balance</span>
+            <span class="summary-card__value" [class.summary-card__value--positive]="balance() >= 0" [class.summary-card__value--negative]="balance() < 0">
+              {{ formattedBalance() }}
+            </span>
+          </div>
+        </article>
+
+        <article class="summary-card summary-card--count">
+          <div class="summary-card__icon" aria-hidden="true">📋</div>
+          <div class="summary-card__content">
+            <span class="summary-card__label">Transactions</span>
+            <span class="summary-card__value">{{ transactionService.transactionCount() }}</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="dashboard__recent" aria-labelledby="recent-heading">
+      <div class="dashboard__section-header">
+        <h2 id="recent-heading" class="dashboard__section-title">Recent Transactions</h2>
+        <a routerLink="/transactions" class="btn btn--secondary btn--sm">View All</a>
+      </div>
+
+      @if (recentTransactions().length === 0) {
+        <app-empty-state
+          icon="dashboard"
+          title="No transactions yet"
+          message="Start tracking your income and expenses to see your financial overview."
+          actionLabel="Add Transaction"
+          actionRoute="/transactions/new"
+        />
+      } @else {
+        <div class="table-container">
+          <table class="transactions-table" role="table">
+            <thead>
+              <tr>
+                <th scope="col">Description</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Type</th>
+                <th scope="col">Category</th>
+                <th scope="col">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (transaction of recentTransactions(); track transaction.id) {
+                <tr>
+                  <td class="transactions-table__description">{{ transaction.description }}</td>
+                  <td class="transactions-table__amount">
+                    <span [class]="'amount--' + transaction.type">
+                      {{ formatAmount(transaction.amount, transaction.type) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [class]="'badge--' + transaction.type">
+                      {{ transaction.type | titlecase }}
+                    </span>
+                  </td>
+                  <td>{{ transaction.category }}</td>
+                  <td>{{ formatDate(transaction.date) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </main>
+</div>

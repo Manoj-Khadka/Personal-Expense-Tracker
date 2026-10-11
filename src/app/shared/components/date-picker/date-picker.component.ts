@@ -28,26 +28,8 @@ import Datepicker from 'bootstrap/js/dist/datepicker.js';
       multi: true
     }
   ],
-  template: `
-    <input
-      #input
-      type="text"
-      class="form-control"
-      [id]="inputId()"
-      [class.is-invalid]="invalid()"
-      [attr.aria-describedby]="describedBy() || null"
-      data-bs-toggle="datepicker"
-      autocomplete="off"
-      placeholder="Select date"
-      (change.bs.datepicker)="handleDateChange($event)"
-      (blur)="handleBlur()"
-    />
-  `,
-  styles: [`
-    :host {
-      display: block;
-    }
-  `]
+  templateUrl: './date-picker.component.html',
+  styleUrl: './date-picker.component.css'
 })
 export class DatePickerComponent implements ControlValueAccessor, AfterViewInit, OnDestroy {
   readonly inputId = input('date-picker');

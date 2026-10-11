@@ -1,0 +1,14 @@
+<div class="empty-state">
+  <div class="empty-state__icon" [attr.data-icon]="icon()"></div>
+  <h3 class="empty-state__title">{{ title() }}</h3>
+  <p class="empty-state__message">{{ message() }}</p>
+  @if (actionLabel() && actionRoute()) {
+    <a [routerLink]="actionRoute()" class="btn btn--primary empty-state__action">
+      {{ actionLabel() }}
+    </a>
+  } @else if (actionLabel() && actionClick()) {
+    <button type="button" class="btn btn--primary empty-state__action" (click)="actionClick()!()">
+      {{ actionLabel() }}
+    </button>
+  }
+</div>

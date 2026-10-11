@@ -1,0 +1,169 @@
+<div class="transaction-form-page">
+  <header class="page-header">
+    <div class="page-header__content">
+      <h1 class="page-header__title">{{ isEditMode() ? 'Edit Transaction' : 'Add Transaction' }}</h1>
+      <a routerLink="/transactions" class="btn btn--secondary">Cancel</a>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="transaction-form" novalidate>
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="description" class="form-label">Description <span class="required" aria-hidden="true">*</span></label>
+          <input
+            type="text"
+            id="description"
+            class="form-input"
+            formControlName="description"
+            placeholder="Enter description"
+            [class.form-input--invalid]="isFieldInvalid('description')"
+            aria-describedby="description-error"
+            aria-invalid="{{ isFieldInvalid('description') }}"
+          />
+          @if (isFieldInvalid('description')) {
+            <div id="description-error" class="form-error" role="alert">
+              @if (form.get('description')?.errors?.['required']) {
+                <span>Description is required</span>
+              }
+              @else if (form.get('description')?.errors?.['whitespace']) {
+                <span>Description cannot be only whitespace</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="amount" class="form-label">Amount <span class="required" aria-hidden="true">*</span></label>
+          <input
+            type="number"
+            id="amount"
+            class="form-input"
+            formControlName="amount"
+            placeholder="0.00"
+            step="0.01"
+            min="0.01"
+            [class.form-input--invalid]="isFieldInvalid('amount')"
+            aria-describedby="amount-error"
+            aria-invalid="{{ isFieldInvalid('amount') }}"
+          />
+          @if (isFieldInvalid('amount')) {
+            <div id="amount-error" class="form-error" role="alert">
+              @if (form.get('amount')?.errors?.['required']) {
+                <span>Amount is required</span>
+              }
+              @else if (form.get('amount')?.errors?.['min']) {
+                <span>Amount must be greater than zero</span>
+              }
+              @else if (form.get('amount')?.errors?.['pattern']) {
+                <span>Amount must be a valid number</span>
+              }
+            </div>
+          }
+        </div>
+
+        <fieldset class="form-field form-fieldset">
+          <legend class="form-label">Type <span class="required" aria-hidden="true">*</span></legend>
+          <div class="radio-group">
+            <label class="radio-option">
+              <input
+                type="radio"
+                value="income"
+                formControlName="type"
+                [class.form-input--invalid]="isFieldInvalid('type')"
+              />
+              <span class="radio-option__content">
+                <span class="radio-option__icon" aria-hidden="true">💰</span>
+                <span>Income</span>
+              </span>
+            </label>
+            <label class="radio-option">
+              <input
+                type="radio"
+                value="expense"
+                formControlName="type"
+              />
+              <span class="radio-option__content">
+                <span class="radio-option__icon" aria-hidden="true">💸</span>
+                <span>Expense</span>
+              </span>
+            </label>
+          </div>
+          @if (isFieldInvalid('type')) {
+            <div class="form-error" role="alert">
+              <span>Please select a transaction type</span>
+            </div>
+          }
+        </fieldset>
+
+        <div class="form-field">
+          <label for="category" class="form-label">Category <span class="required" aria-hidden="true">*</span></label>
+          <select
+            id="category"
+            class="form-select"
+            formControlName="category"
+            [class.form-input--invalid]="isFieldInvalid('category')"
+            aria-describedby="category-error"
+            aria-invalid="{{ isFieldInvalid('category') }}"
+          >
+            <option value="">Select category</option>
+            @for (cat of availableCategories(); track cat) {
+              <option [value]="cat">{{ cat }}</option>
+            }
+          </select>
+          @if (isFieldInvalid('category')) {
+            <div id="category-error" class="form-error" role="alert">
+              <span>Please select a category</span>
+            </div>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="date" class="form-label">Date <span class="required" aria-hidden="true">*</span></label>
+          <app-date-picker
+            inputId="date"
+            formControlName="date"
+            [invalid]="isFieldInvalid('date')"
+            describedBy="date-error"
+          ></app-date-picker>
+          @if (isFieldInvalid('date')) {
+            <div id="date-error" class="form-error" role="alert">
+              @if (form.get('date')?.errors?.['required']) {
+                <span>Date is required</span>
+              }
+              @else if (form.get('date')?.errors?.['invalidDate']) {
+                <span>Please enter a valid calendar date</span>
+              }
+              @else {
+                <span>Please enter a valid date</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (saveError()) {
+        <div class="save-error" role="alert">
+          <span aria-hidden="true">⚠️</span>
+          <span>{{ saveError() }}</span>
+        </div>
+      }
+
+      <div class="form-actions">
+        <a routerLink="/transactions" class="btn btn--secondary">Cancel</a>
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="isSubmitting()"
+        >
+          @if (isSubmitting()) {
+            <span class="btn__spinner" aria-hidden="true"></span>
+            Saving...
+          } @else {
+            {{ isEditMode() ? 'Update' : 'Save' }} Transaction
+          }
+        </button>
+      </div>
+    </form>
+  </main>
+</div>

@@ -1,0 +1,13 @@
+<input
+  #input
+  type="text"
+  class="form-control"
+  [id]="inputId()"
+  [class.is-invalid]="invalid()"
+  [attr.aria-describedby]="describedBy() || null"
+  data-bs-toggle="datepicker"
+  autocomplete="off"
+  placeholder="Select date"
+  (change.bs.datepicker)="handleDateChange($event)"
+  (blur)="handleBlur()"
+/>
