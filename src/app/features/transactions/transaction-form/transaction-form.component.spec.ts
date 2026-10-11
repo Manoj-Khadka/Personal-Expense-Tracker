@@ -87,6 +87,33 @@ describe('TransactionFormComponent', () => {
     expect(host.querySelector<HTMLSelectElement>('#category')?.value).toBe('');
   });
 
+  it('only marks the touched field invalid, not every empty field', () => {
+    const fixture = createComponent();
+    const host = fixture.nativeElement as HTMLElement;
+
+    const description = host.querySelector<HTMLInputElement>('#description')!;
+    description.dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+
+    // The blurred description is empty, so it shows its error...
+    expect(host.querySelector('#description-error')).not.toBeNull();
+    // ...but the other untouched empty fields must not be flagged.
+    expect(host.querySelector('#amount-error')).toBeNull();
+    expect(host.querySelector('#category-error')).toBeNull();
+  });
+
+  it('reveals every field error after a submit attempt', () => {
+    const fixture = createComponent();
+    const host = fixture.nativeElement as HTMLElement;
+
+    host.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(host.querySelector('#description-error')).not.toBeNull();
+    expect(host.querySelector('#amount-error')).not.toBeNull();
+    expect(host.querySelector('#category-error')).not.toBeNull();
+  });
+
   it('shows an inline error instead of an alert when saving fails', () => {
     const fixture = createComponent();
     const host = fixture.nativeElement as HTMLElement;

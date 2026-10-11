@@ -298,6 +298,19 @@ type TransactionForm = FormGroup<{
       box-shadow: 0 0 0 3px var(--color-primary-light);
     }
 
+    /* Replace the native select arrow (which renders flush against the right
+       border) with a controlled, inset chevron. */
+    .form-select {
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      padding-right: 2.5rem;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.875rem center;
+      background-size: 1rem;
+    }
+
     .form-input--invalid,
     .form-select--invalid {
       border-color: var(--color-error);
@@ -529,7 +542,10 @@ export class TransactionFormComponent implements OnInit {
 
   protected isFieldInvalid(fieldName: string): boolean {
     const control = this.form.get(fieldName);
-    return !!control && control.invalid && (control.touched || control.dirty || this.form.touched);
+    // Only react to this control's own state. Checking `this.form.touched`
+    // here would turn every invalid field red as soon as a single field is
+    // touched, because touching a child marks the parent group touched too.
+    return !!control && control.invalid && (control.touched || control.dirty);
   }
 
   /**
