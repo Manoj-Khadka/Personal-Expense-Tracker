@@ -2,6 +2,7 @@ import { Injectable, signal, computed, WritableSignal } from '@angular/core';
 import { Transaction, TransactionType, isValidTransaction, generateId, formatCurrency } from '../../models/transaction.model';
 
 const STORAGE_KEY = 'expense-tracker-transactions-v1';
+const STORAGE_BACKUP_KEY = 'expense-tracker-transactions-v1-backup';
 
 @Injectable({
   providedIn: 'root'
@@ -32,29 +33,57 @@ export class TransactionService {
   }
 
   private loadFromStorage(): void {
+    let stored: string | null = null;
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) {
-        this._transactions.set([]);
-        return;
-      }
-
-      const parsed = JSON.parse(stored);
-      if (!Array.isArray(parsed)) {
-        console.warn('Invalid transaction data in localStorage, resetting');
-        this._transactions.set([]);
-        return;
-      }
-
-      const validTransactions = parsed.filter(isValidTransaction);
-      if (validTransactions.length !== parsed.length) {
-        console.warn('Some transactions were invalid and have been discarded');
-      }
-
-      this._transactions.set(validTransactions);
+      stored = localStorage.getItem(STORAGE_KEY);
     } catch (error) {
-      console.error('Failed to load transactions from localStorage:', error);
+      console.error('Failed to read transactions from localStorage:', error);
       this._transactions.set([]);
+      return;
+    }
+
+    if (!stored) {
+      this._transactions.set([]);
+      return;
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(stored);
+    } catch (error) {
+      console.error('Failed to parse transactions from localStorage:', error);
+      this.backupCorruptedData(stored);
+      this._transactions.set([]);
+      return;
+    }
+
+    if (!Array.isArray(parsed)) {
+      console.warn('Invalid transaction data in localStorage, resetting');
+      this.backupCorruptedData(stored);
+      this._transactions.set([]);
+      return;
+    }
+
+    const validTransactions = parsed.filter(isValidTransaction);
+    if (validTransactions.length !== parsed.length) {
+      console.warn('Some transactions were invalid and have been discarded');
+      this.backupCorruptedData(stored);
+    }
+
+    this._transactions.set(validTransactions);
+  }
+
+  /**
+   * Copies the raw (unreadable or partially invalid) stored value to a backup
+   * key before it can be overwritten, so a corrupted payload stays recoverable
+   * instead of being lost. Best effort: if storage is full or unavailable the
+   * failure is logged and ignored so loading can continue.
+   */
+  private backupCorruptedData(raw: string): void {
+    try {
+      localStorage.setItem(STORAGE_BACKUP_KEY, raw);
+    } catch (error) {
+      console.warn('Could not back up corrupt transaction data:', error);
     }
   }
 

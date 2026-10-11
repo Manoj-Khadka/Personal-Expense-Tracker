@@ -57,6 +57,17 @@ describe('isValidTransaction', () => {
     expect(isValidTransaction({ ...validTransaction, category: 'Nonsense' })).toBe(false);
   });
 
+  it('rejects a category that does not belong to the transaction type', () => {
+    expect(isValidTransaction({ ...validTransaction, type: 'expense', category: 'Salary' })).toBe(false);
+    expect(isValidTransaction({ ...validTransaction, type: 'income', category: 'Food' })).toBe(false);
+  });
+
+  it('accepts a category that belongs to the transaction type', () => {
+    expect(isValidTransaction({ ...validTransaction, type: 'expense', category: 'Food' })).toBe(true);
+    expect(isValidTransaction({ ...validTransaction, type: 'income', category: 'Other' })).toBe(true);
+    expect(isValidTransaction({ ...validTransaction, type: 'expense', category: 'Other' })).toBe(true);
+  });
+
   it('rejects non-object values', () => {
     expect(isValidTransaction(null)).toBe(false);
     expect(isValidTransaction(undefined)).toBe(false);

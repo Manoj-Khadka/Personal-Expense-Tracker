@@ -3,6 +3,7 @@ import { TransactionService } from './transaction.service';
 import { Transaction } from '../../models/transaction.model';
 
 const STORAGE_KEY = 'expense-tracker-transactions-v1';
+const STORAGE_BACKUP_KEY = 'expense-tracker-transactions-v1-backup';
 
 describe('TransactionService', () => {
   let service: TransactionService;
@@ -150,5 +151,40 @@ describe('TransactionService', () => {
 
     expect(fresh.transactionCount()).toBe(1);
     expect(fresh.getTransactionById('ok')).toBeDefined();
+  });
+
+  it('backs up corrupt JSON before resetting', () => {
+    const corrupt = '{ this is not valid json';
+    localStorage.setItem(STORAGE_KEY, corrupt);
+
+    const fresh = new TransactionService();
+
+    expect(fresh.transactionCount()).toBe(0);
+    expect(localStorage.getItem(STORAGE_BACKUP_KEY)).toBe(corrupt);
+  });
+
+  it('backs up the stored value when a non-array payload is reset', () => {
+    const stored = JSON.stringify({ not: 'an array' });
+    localStorage.setItem(STORAGE_KEY, stored);
+
+    const fresh = new TransactionService();
+
+    expect(fresh.transactionCount()).toBe(0);
+    expect(localStorage.getItem(STORAGE_BACKUP_KEY)).toBe(stored);
+  });
+
+  it('backs up the stored value when some records are discarded', () => {
+    const stored = JSON.stringify([
+      { id: 'ok', description: 'Salary', amount: 5000, type: 'income', category: 'Salary', date: '2026-01-15' },
+      { id: 'mismatch', description: 'Food', amount: 100, type: 'expense', category: 'Salary', date: '2026-01-16' }
+    ]);
+    localStorage.setItem(STORAGE_KEY, stored);
+
+    const fresh = new TransactionService();
+
+    expect(fresh.transactionCount()).toBe(1);
+    expect(fresh.getTransactionById('ok')).toBeDefined();
+    expect(fresh.getTransactionById('mismatch')).toBeUndefined();
+    expect(localStorage.getItem(STORAGE_BACKUP_KEY)).toBe(stored);
   });
 });

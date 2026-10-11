@@ -43,6 +43,12 @@ Core requirements the code satisfies:
 Build tooling is the modern `@angular/build:application` builder. There is **no
 SSR** and no server entry point (see section 15).
 
+Type checking is fully strict. `tsconfig.json` enables `"strict": true` in
+`compilerOptions` (which turns on `strictNullChecks`, `noImplicitAny`,
+`strictFunctionTypes`, etc.) and `"strictTemplates": true` in
+`angularCompilerOptions`, so template bindings are type-checked too. Both the
+app and the test files pass `tsc --noEmit` under these settings.
+
 Useful scripts:
 
 ```bash
@@ -566,14 +572,14 @@ the palette and spacing can change in one place.
 
 ## 14. Tests
 
-Run with `npm test` (Vitest + jsdom). **5 files, 29 tests.**
+Run with `npm test` (Vitest + jsdom). **5 files, 34 tests.**
 
 | File | Covers |
 |------|--------|
 | `app.spec.ts` | Root component creates and renders `<router-outlet>`. |
-| `transaction.model.spec.ts` | `isValidDateString` (real, malformed, impossible dates incl. leap years); `isValidTransaction` (good record, bad date, non-positive amount, bad type/description/category, non-objects). |
+| `transaction.model.spec.ts` | `isValidDateString` (real, malformed, impossible dates incl. leap years); `isValidTransaction` (good record, bad date, non-positive amount, bad type/description, empty **or unknown** category, non-objects). |
 | `transaction.service.spec.ts` | Creation, start-empty, add + persist + unique id, totals/balance, update preserves id, update/delete missing → `false`, delete removes from storage, find by type. Plus hydration: synchronous load on construction, corrupt JSON → empty, invalid records dropped. |
-| `transaction-list.component.spec.ts` | Default render, **combined** search + type + category filter, category reset when type changes, and that the dashboard **total** is independent of active filters. |
+| `transaction-list.component.spec.ts` | Default render, **combined** search + type + category filter, category reset when type changes, dashboard **total** is independent of active filters, **newest-first** ordering, deterministic tie-break by id, and **delete-fails** path shows the inline error. |
 | `transaction-form.component.spec.ts` | Edit route loads a pre-seeded record (simulated refresh), category options swap with type, edit mode keeps then clears the stored category on type change, and **save-fails** path shows the inline error instead of an alert. |
 
 The last three service tests and the form/list component tests were added

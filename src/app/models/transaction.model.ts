@@ -80,11 +80,6 @@ export function formatDate(dateString: string): string {
   });
 }
 
-/**
- * Returns the current local calendar date as a `YYYY-MM-DD` string.
- * Uses local date parts (not `toISOString()`, which is UTC) so the value
- * never shifts to the previous/next day near midnight.
- */
 export function getTodayLocalISODate(): string {
   const today = new Date();
   const year = today.getFullYear();
@@ -93,10 +88,7 @@ export function getTodayLocalISODate(): string {
   return `${year}-${month}-${day}`;
 }
 
-/**
- * Strictly validates a `YYYY-MM-DD` string, rejecting impossible calendar
- * dates such as `2026-02-30` in addition to malformed input.
- */
+
 export function isValidDateString(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return false;
@@ -110,9 +102,6 @@ export function isValidDateString(value: string): boolean {
   if (month < 1 || month > 12 || day < 1 || day > 31) {
     return false;
   }
-
-  // Date.UTC normalizes overflowing values (e.g. Feb 30 -> Mar 2),
-  // so comparing the parts back catches impossible dates.
   const date = new Date(Date.UTC(year, month - 1, day));
 
   return (
@@ -129,7 +118,12 @@ export function isValidTransaction(obj: unknown): obj is Transaction {
   const description = t['description'];
   const amount = t['amount'];
   const type = t['type'];
+  const category = t['category'];
   const date = t['date'];
+
+  if (type !== 'income' && type !== 'expense') {
+    return false;
+  }
 
   return (
     typeof t['id'] === 'string' &&
@@ -137,8 +131,9 @@ export function isValidTransaction(obj: unknown): obj is Transaction {
     description.trim().length > 0 &&
     typeof amount === 'number' &&
     amount > 0 &&
-    (type === 'income' || type === 'expense') &&
-    isCategory(t['category']) &&
+    isCategory(category) &&
+
+    getCategoriesForType(type).includes(category) &&
     typeof date === 'string' &&
     isValidDateString(date)
   );

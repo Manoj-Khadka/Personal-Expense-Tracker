@@ -43,7 +43,7 @@ The add/edit form is fully typed via `NonNullableFormBuilder`. The category list
 ## Key decisions
 
 - **Signals as the source of truth.** One service owns the data; the dashboard, list and form all derive from the same signals, so totals and counts can never drift from the list.
-- **Validate on load.** Stored records are checked field by field (`isValidTransaction`) before use. Corrupt JSON or invalid records are dropped and the log is reset. It is a destructive choice, but it keeps the app working instead of crashing on a bad payload; a safer alternative would be to copy the bad value to a backup key before resetting.
+- **Validate on load.** Stored records are checked field by field (`isValidTransaction`) before use, including that each category belongs to its transaction type (so a corrupt record cannot pair `type: 'expense'` with `category: 'Salary'`). Corrupt JSON or invalid records are dropped and the log is reset. Before resetting, the raw stored value is copied to `expense-tracker-transactions-v1-backup`, so a bad payload stays recoverable instead of being lost.
 - **Local dates, not UTC.** The default date uses local date parts, so it never shifts a day near midnight.
 - **NPR currency.** Amounts are formatted with `Intl.NumberFormat('en-NP', { currency: 'NPR' })`.
 - **Typed categories.** The category lists are `as const` tuples, and `Category` is derived from them, so a typo in a category is a compile error.
@@ -52,7 +52,6 @@ The add/edit form is fully typed via `NonNullableFormBuilder`. The category list
 ## What I would improve with more time
 
 - Move filters into query params so a filtered view is shareable and survives back/forward.
-- Back up corrupt `localStorage` before resetting, and show a one-off notice.
 - Add an undo for delete instead of relying on `confirm()`.
 - Include an end-to-end test that drives the real flows in a browser.
 - Add budgeting or month-over-month breakdowns.
@@ -102,7 +101,7 @@ interface Transaction {
 Income categories: Salary, Freelance, Business, Investment, Other.
 Expense categories: Food, Transport, Shopping, Bills, Health, Entertainment, Education, Other.
 
-Stored data is validated on load; malformed JSON or invalid records are discarded rather than crashing the app.
+Stored data is validated on load; malformed JSON or invalid records are discarded rather than crashing the app, and the raw value is backed up under `expense-tracker-transactions-v1-backup` first.
 
 ## Manual test checklist
 
@@ -114,7 +113,7 @@ Stored data is validated on load; malformed JSON or invalid records are discarde
 - Combine type + category filters, then clear them.
 - Switch type in the form and confirm the category options change.
 - Resize to 375px and confirm you can still edit and delete.
-- Corrupt the `localStorage` JSON by hand and reload — the app starts empty instead of crashing.
+- Corrupt the `localStorage` JSON by hand and reload — the app starts empty instead of crashing, and the bad value is copied to the `...-backup` key.
 
 ## Limitations
 
